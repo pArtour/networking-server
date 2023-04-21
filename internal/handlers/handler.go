@@ -11,6 +11,6 @@ type Handlers struct {
 }
 
 // NewHandlers returns a new Handlers struct
-func NewHandlers(app *fiber.App, c *controllers.Controllers) {
-	NewUserHandler(app, c.UserController)
+func NewHandlers(router fiber.Router, c *controllers.Controllers) {
+	NewUserHandler(router, c.UserController)
 }

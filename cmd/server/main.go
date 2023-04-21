@@ -30,8 +30,11 @@ func main() {
 	// Controllers setup
 	c := controllers.NewControllers(s)
 
+	// Routes setup
+	r := app.Group("/api/v1")
+
 	// Handlers setup
-	handlers.NewHandlers(app, c)
+	handlers.NewHandlers(r, c)
 
 	// Start the server
 	log.Fatal(app.Listen(cfg.Server.Port))

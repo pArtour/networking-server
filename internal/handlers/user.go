@@ -12,8 +12,8 @@ type UserHandler struct {
 }
 
 // NewUserHandler returns a new UserHandler struct
-func NewUserHandler(app *fiber.App, uc *controllers.UserController) {
-	usersRouter := app.Group("/users")
+func NewUserHandler(router fiber.Router, uc *controllers.UserController) {
+	usersRouter := router.Group("/users")
 	uh := &UserHandler{
 		controller: uc,
 	}
