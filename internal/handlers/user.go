@@ -23,11 +23,11 @@ func NewUserHandler(app *fiber.App, uc *controllers.UserController) {
 
 // setupUserRoutes sets up all routes for users
 func (uh *UserHandler) setupUserRoutes(r fiber.Router) {
-	r.Get("/users", uh.getUsersHandler)
-	r.Get("/users/:id", uh.getUserHandler)
-	r.Post("/users", uh.createUserHandler)
-	r.Put("/users/:id", uh.updateUserHandler)
-	r.Delete("/users/:id", uh.deleteUserHandler)
+	r.Get("/", uh.getUsersHandler)
+	r.Get("/:id", uh.getUserHandler)
+	r.Post("/", uh.createUserHandler)
+	r.Put("/:id", uh.updateUserHandler)
+	r.Delete("/:id", uh.deleteUserHandler)
 }
 
 // getUsersHandler handles GET /users

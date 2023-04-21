@@ -9,6 +9,7 @@ import (
 	"github.com/pArtour/networking-server/internal/database"
 	"github.com/pArtour/networking-server/internal/handlers"
 	"github.com/pArtour/networking-server/internal/services"
+	"log"
 )
 
 func main() {
@@ -33,5 +34,5 @@ func main() {
 	handlers.NewHandlers(app, c)
 
 	// Start the server
-	app.Listen(cfg.Server.Port)
+	log.Fatal(app.Listen(cfg.Server.Port))
 }
