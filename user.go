@@ -1,5 +1,9 @@
 package main
 
+import (
+	"context"
+)
+
 type User struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
