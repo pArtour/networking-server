@@ -20,7 +20,7 @@ func NewUserController(us *services.UserService, as *services.AuthService) *User
 }
 
 // GetUsers returns all users
-func (c *UserController) GetUsers() ([]models.User, error) {
+func (c *UserController) GetUsers() ([]*models.User, error) {
 	users, err := c.userService.GetUsers()
 	if err != nil {
 		return nil, err

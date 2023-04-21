@@ -19,16 +19,16 @@ func NewUserService(db *database.Db) *UserService {
 }
 
 // GetUsers returns all users
-func (s *UserService) GetUsers() ([]models.User, error) {
+func (s *UserService) GetUsers() ([]*models.User, error) {
 	rows, err := s.db.Conn.Query(context.Background(), "SELECT id, name FROM users")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []models.User
+	var users []*models.User
 	for rows.Next() {
-		var user models.User
+		var user *models.User
 		err := rows.Scan(&user.ID, &user.Name)
 		if err != nil {
 			return nil, err

@@ -11,7 +11,6 @@ import (
 	"github.com/pArtour/networking-server/internal/database"
 	"github.com/pArtour/networking-server/internal/errors"
 	"github.com/pArtour/networking-server/internal/handlers"
-	"github.com/pArtour/networking-server/internal/middleware"
 	"github.com/pArtour/networking-server/internal/services"
 	"log"
 )
@@ -51,7 +50,7 @@ func main() {
 	c := controllers.NewControllers(s)
 
 	// Routes setup
-	r := app.Group("/api/v1", middleware.JWTProtected())
+	r := app.Group("/api/v1")
 
 	// Handlers setup
 	handlers.NewHandlers(r, c)

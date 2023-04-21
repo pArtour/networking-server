@@ -5,6 +5,7 @@ import (
 	"github.com/pArtour/networking-server/internal/controllers"
 	"github.com/pArtour/networking-server/internal/errors"
 	"github.com/pArtour/networking-server/internal/helpers"
+	"github.com/pArtour/networking-server/internal/middleware"
 	"github.com/pArtour/networking-server/internal/models"
 	"github.com/pArtour/networking-server/internal/validation"
 )
@@ -16,7 +17,7 @@ type UserHandler struct {
 
 // NewUserHandler returns a new UserHandler struct
 func NewUserHandler(router fiber.Router, uc *controllers.UserController) {
-	usersRouter := router.Group("/users")
+	usersRouter := router.Group("/users", middleware.JWTProtected())
 	h := &UserHandler{
 		controller: uc,
 	}
