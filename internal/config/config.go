@@ -10,6 +10,7 @@ type Config struct {
 	Server struct {
 		Port string
 	}
+	Env string
 }
 
 // NewConfig returns a new Config struct
@@ -25,7 +26,17 @@ func NewConfig() *Config {
 		}{
 			Port: getPort(),
 		},
+		Env: getEnv(),
 	}
+}
+
+func getEnv() string {
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "production"
+	}
+
+	return env
 }
 
 func getPort() string {

@@ -40,18 +40,18 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 }
 
 // CreateUser creates a new user
-func (s *UserService) CreateUser(name string) (int64, error) {
-	var id int64
-	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name) VALUES ($1) RETURNING id", name).Scan(&id)
+func (s *UserService) CreateUser(body *models.CreateUserBody) (*models.User, error) {
+	var user models.User
+	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name) VALUES ($1) RETURNING id, name", body.Name).Scan(&user.ID, &user.Name)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return id, nil
+	return &user, nil
 }
 
 // UpdateUser updates a user
-func (s *UserService) UpdateUser(id int64, name string) error {
-	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$1 WHERE id=$2", name, id)
+func (s *UserService) UpdateUser(id int64, body *models.UpdateUserBody) error {
+	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$1 WHERE id=$2", body.Name, id)
 	return err
 }
 
@@ -62,11 +62,11 @@ func (s *UserService) DeleteUser(id int64) error {
 }
 
 // GetUser returns a user
-func (s *UserService) GetUser(id int64) (models.User, error) {
+func (s *UserService) GetUser(id int64) (*models.User, error) {
 	var user models.User
 	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name FROM users WHERE id=$1", id).Scan(&user.ID, &user.Name)
 	if err != nil {
-		return models.User{}, err
+		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }

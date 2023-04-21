@@ -27,26 +27,26 @@ func (uc *UserController) GetUsers() ([]models.User, error) {
 }
 
 // GetUserById returns a user by id
-func (uc *UserController) GetUserById(id int64) (models.User, error) {
+func (uc *UserController) GetUserById(id int64) (*models.User, error) {
 	user, err := uc.service.GetUser(id)
 	if err != nil {
-		return models.User{}, err
+		return nil, err
 	}
 	return user, nil
 }
 
 // CreateUser creates a new user
-func (uc *UserController) CreateUser(name string) (int64, error) {
-	id, err := uc.service.CreateUser(name)
+func (uc *UserController) CreateUser(body *models.CreateUserBody) (*models.User, error) {
+	user, err := uc.service.CreateUser(body)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return id, nil
+	return user, nil
 }
 
 // UpdateUser updates a user
-func (uc *UserController) UpdateUser(id int64, name string) error {
-	err := uc.service.UpdateUser(id, name)
+func (uc *UserController) UpdateUser(id int64, body *models.UpdateUserBody) error {
+	err := uc.service.UpdateUser(id, body)
 	if err != nil {
 		return err
 	}
