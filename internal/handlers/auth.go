@@ -93,7 +93,7 @@ func (h *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 func NewAuthHandler(router fiber.Router, uc *controllers.UserController) {
 	h := &AuthHandler{controller: uc}
-	authRouter := router.Group("/api/v1/auth")
+	authRouter := router.Group("/auth")
 	authRouter.Post("/login", h.LoginHandler)
 	authRouter.Post("/register", h.RegisterHandler)
 }
