@@ -92,7 +92,7 @@ func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 
-	err = uh.controller.UpdateUser(id, *user)
+	err = uh.controller.UpdateUser(id, user)
 	if err != nil {
 		return c.Status(500).SendString("Error updating handlers")
 	}
