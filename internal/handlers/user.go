@@ -68,11 +68,11 @@ func (uh *UserHandler) createUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 
-	id, err := uh.controller.CreateUser(user)
+	newUser, err := uh.controller.CreateUser(user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error creating user"})
 	}
-	return c.JSON(fiber.Map{"id": id})
+	return c.JSON(newUser)
 }
 
 // updateUserHandler handles PUT /users/:id
@@ -90,6 +90,11 @@ func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 	validationErrors := validation.ValidateStruct(*user)
 	if validationErrors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
+	}
+
+	_, err = uh.controller.GetUserById(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(&errors.ErrorResponse{Code: fiber.StatusNotFound, Message: "User not found"})
 	}
 
 	err = uh.controller.UpdateUser(id, user)
