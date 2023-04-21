@@ -78,12 +78,12 @@ func (h *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 	newUser, err := h.controller.CreateUser(&input)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error creating user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error creating user: %s", err)})
 	}
 
 	token, err := helpers.GenerateJWTToken(newUser.ID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error creating user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error creating user: %s", err)})
 	}
 
 	return c.JSON(fiber.Map{
