@@ -7,10 +7,12 @@ import (
 	"github.com/pArtour/networking-server/internal/config"
 )
 
+// Db is a struct that contains a database connection
 type Db struct {
 	Conn *pgx.Conn
 }
 
+// NewDb returns a new Db struct
 func NewDb(config *config.Config) *Db {
 	var err error
 	conn, err := pgx.Connect(context.Background(), config.Database.Url)

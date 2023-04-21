@@ -2,6 +2,7 @@ package config
 
 import "os"
 
+// Config is a struct that holds all the configuration variables
 type Config struct {
 	Database struct {
 		Url string
@@ -11,6 +12,7 @@ type Config struct {
 	}
 }
 
+// NewConfig returns a new Config struct
 func NewConfig() *Config {
 	return &Config{
 		Database: struct {

@@ -6,10 +6,12 @@ import (
 	"strconv"
 )
 
+// UserHandler is a struct that contains all handlers for users
 type UserHandler struct {
 	controller *controllers.UserController
 }
 
+// NewUserHandler returns a new UserHandler struct
 func NewUserHandler(app *fiber.App, uc *controllers.UserController) {
 	usersRouter := app.Group("/users")
 	uh := &UserHandler{
@@ -19,6 +21,7 @@ func NewUserHandler(app *fiber.App, uc *controllers.UserController) {
 	uh.setupUserRoutes(usersRouter)
 }
 
+// setupUserRoutes sets up all routes for users
 func (uh *UserHandler) setupUserRoutes(r fiber.Router) {
 	r.Get("/users", uh.getUsersHandler)
 	r.Get("/users/:id", uh.getUserHandler)
@@ -27,6 +30,7 @@ func (uh *UserHandler) setupUserRoutes(r fiber.Router) {
 	r.Delete("/users/:id", uh.deleteUserHandler)
 }
 
+// getUsersHandler handles GET /users
 func (uh *UserHandler) getUsersHandler(c *fiber.Ctx) error {
 	users, err := uh.controller.GetUsers()
 	if err != nil {
@@ -35,6 +39,7 @@ func (uh *UserHandler) getUsersHandler(c *fiber.Ctx) error {
 	return c.JSON(users)
 }
 
+// getUserHandler handles GET /users/:id
 func (uh *UserHandler) getUserHandler(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
@@ -48,6 +53,7 @@ func (uh *UserHandler) getUserHandler(c *fiber.Ctx) error {
 
 }
 
+// createUserHandler handles POST /users
 func (uh *UserHandler) createUserHandler(c *fiber.Ctx) error {
 	name := c.FormValue("name")
 	if name == "" {
@@ -60,6 +66,7 @@ func (uh *UserHandler) createUserHandler(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"id": id})
 }
 
+// updateUserHandler handles PUT /users/:id
 func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
@@ -76,6 +83,7 @@ func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 	return c.SendStatus(200)
 }
 
+// deleteUserHandler handles DELETE /users/:id
 func (uh *UserHandler) deleteUserHandler(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
