@@ -9,19 +9,7 @@ import (
 	"github.com/pArtour/networking-server/internal/database"
 	"github.com/pArtour/networking-server/internal/handlers"
 	"github.com/pArtour/networking-server/internal/services"
-	"os"
 )
-
-func getPort() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = ":3000"
-	} else {
-		port = ":" + port
-	}
-
-	return port
-}
 
 func main() {
 	cfg := config.NewConfig()

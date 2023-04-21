@@ -23,7 +23,18 @@ func NewConfig() *Config {
 		Server: struct {
 			Port string
 		}{
-			Port: os.Getenv("PORT"),
+			Port: getPort(),
 		},
 	}
+}
+
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":3000"
+	} else {
+		port = ":" + port
+	}
+
+	return port
 }
