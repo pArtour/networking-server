@@ -7,19 +7,21 @@ import (
 
 // UserController is a struct that contains a UserService
 type UserController struct {
-	service *services.UserService
+	userService *services.UserService
+	authService *services.AuthService
 }
 
 // NewUserController returns a new UserController struct
-func NewUserController(us *services.UserService) *UserController {
+func NewUserController(us *services.UserService, as *services.AuthService) *UserController {
 	return &UserController{
-		service: us,
+		userService: us,
+		authService: as,
 	}
 }
 
 // GetUsers returns all users
-func (uc *UserController) GetUsers() ([]models.User, error) {
-	users, err := uc.service.GetUsers()
+func (c *UserController) GetUsers() ([]models.User, error) {
+	users, err := c.userService.GetUsers()
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +29,20 @@ func (uc *UserController) GetUsers() ([]models.User, error) {
 }
 
 // GetUserById returns a user by id
-func (uc *UserController) GetUserById(id int64) (*models.User, error) {
-	user, err := uc.service.GetUser(id)
+func (c *UserController) GetUserById(id int64) (*models.User, error) {
+	user, err := c.userService.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (c *UserController) LoginUser(email, password string) (*models.User, error) {
+	user, err := c.userService.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	err = c.authService.CheckUserCredentials(password, user)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +50,8 @@ func (uc *UserController) GetUserById(id int64) (*models.User, error) {
 }
 
 // CreateUser creates a new user
-func (uc *UserController) CreateUser(body *models.CreateUserBody) (*models.User, error) {
-	user, err := uc.service.CreateUser(body)
+func (c *UserController) CreateUser(body *models.CreateUserInput) (*models.User, error) {
+	user, err := c.userService.CreateUser(body)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +59,8 @@ func (uc *UserController) CreateUser(body *models.CreateUserBody) (*models.User,
 }
 
 // UpdateUser updates a user
-func (uc *UserController) UpdateUser(id int64, body *models.UpdateUserBody) error {
-	err := uc.service.UpdateUser(id, body)
+func (c *UserController) UpdateUser(id int64, body *models.UpdateUserInput) error {
+	err := c.userService.UpdateUser(id, body)
 	if err != nil {
 		return err
 	}
@@ -54,8 +68,8 @@ func (uc *UserController) UpdateUser(id int64, body *models.UpdateUserBody) erro
 }
 
 // DeleteUser deletes a user
-func (uc *UserController) DeleteUser(id int64) error {
-	err := uc.service.DeleteUser(id)
+func (c *UserController) DeleteUser(id int64) error {
+	err := c.userService.DeleteUser(id)
 	if err != nil {
 		return err
 	}

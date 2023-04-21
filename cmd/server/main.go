@@ -11,12 +11,13 @@ import (
 	"github.com/pArtour/networking-server/internal/database"
 	"github.com/pArtour/networking-server/internal/errors"
 	"github.com/pArtour/networking-server/internal/handlers"
+	"github.com/pArtour/networking-server/internal/middleware"
 	"github.com/pArtour/networking-server/internal/services"
 	"log"
 )
 
 func main() {
-	cfg := config.NewConfig()
+	config.InitConfig()
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
@@ -29,7 +30,7 @@ func main() {
 	})
 	app.Use(cors.New(cors.Config{
 		AllowOriginsFunc: func(origin string) bool {
-			return cfg.Env == "development"
+			return config.Cfg.Env == "development"
 		},
 	}))
 
@@ -40,7 +41,7 @@ func main() {
 	}))
 
 	// Database setup
-	db := database.NewDb(cfg)
+	db := database.NewDb()
 	defer db.Conn.Close(context.Background())
 
 	// Services setup
@@ -50,11 +51,11 @@ func main() {
 	c := controllers.NewControllers(s)
 
 	// Routes setup
-	r := app.Group("/api/v1")
+	r := app.Group("/api/v1", middleware.JWTProtected())
 
 	// Handlers setup
 	handlers.NewHandlers(r, c)
 
 	// Start the server
-	log.Fatal(app.Listen(cfg.Server.Port))
+	log.Fatal(app.Listen(config.Cfg.Server.Port))
 }

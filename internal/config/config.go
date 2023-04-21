@@ -2,6 +2,8 @@ package config
 
 import "os"
 
+var Cfg *Config
+
 // Config is a struct that holds all the configuration variables
 type Config struct {
 	Database struct {
@@ -10,12 +12,13 @@ type Config struct {
 	Server struct {
 		Port string
 	}
-	Env string
+	Env       string
+	JWTSecret string
 }
 
-// NewConfig returns a new Config struct
-func NewConfig() *Config {
-	return &Config{
+// InitConfig initializes the configuration variables
+func InitConfig() {
+	Cfg = &Config{
 		Database: struct {
 			Url string
 		}{
@@ -26,7 +29,8 @@ func NewConfig() *Config {
 		}{
 			Port: getPort(),
 		},
-		Env: getEnv(),
+		Env:       getEnv(),
+		JWTSecret: os.Getenv("JWT_SECRET"),
 	}
 }
 

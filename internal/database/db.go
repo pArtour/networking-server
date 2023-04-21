@@ -13,9 +13,9 @@ type Db struct {
 }
 
 // NewDb returns a new Db struct
-func NewDb(config *config.Config) *Db {
+func NewDb() *Db {
 	var err error
-	conn, err := pgx.Connect(context.Background(), config.Database.Url)
+	conn, err := pgx.Connect(context.Background(), config.Cfg.Database.Url)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return nil

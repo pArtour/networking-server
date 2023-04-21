@@ -39,8 +39,17 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
+func (s *UserService) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name, email, password FROM users WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // CreateUser creates a new user
-func (s *UserService) CreateUser(body *models.CreateUserBody) (*models.User, error) {
+func (s *UserService) CreateUser(body *models.CreateUserInput) (*models.User, error) {
 	var user models.User
 	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name) VALUES ($1) RETURNING id, name", body.Name).Scan(&user.ID, &user.Name)
 	if err != nil {
@@ -50,7 +59,7 @@ func (s *UserService) CreateUser(body *models.CreateUserBody) (*models.User, err
 }
 
 // UpdateUser updates a user
-func (s *UserService) UpdateUser(id int64, body *models.UpdateUserBody) error {
+func (s *UserService) UpdateUser(id int64, body *models.UpdateUserInput) error {
 	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$1 WHERE id=$2", body.Name, id)
 	return err
 }

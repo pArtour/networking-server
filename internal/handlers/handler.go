@@ -8,9 +8,11 @@ import (
 // Handlers is a struct that contains all handlers
 type Handlers struct {
 	Uh *UserHandler
+	Ah *AuthHandler
 }
 
 // NewHandlers returns a new Handlers struct
 func NewHandlers(router fiber.Router, c *controllers.Controllers) {
 	NewUserHandler(router, c.UserController)
+	NewAuthHandler(router, c.UserController)
 }

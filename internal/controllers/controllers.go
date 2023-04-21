@@ -10,6 +10,6 @@ type Controllers struct {
 // NewControllers returns a new Controllers struct
 func NewControllers(s *services.Services) *Controllers {
 	return &Controllers{
-		UserController: NewUserController(s.Us),
+		UserController: NewUserController(s.Us, s.As),
 	}
 }

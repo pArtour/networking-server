@@ -4,9 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/pArtour/networking-server/internal/controllers"
 	"github.com/pArtour/networking-server/internal/errors"
+	"github.com/pArtour/networking-server/internal/helpers"
 	"github.com/pArtour/networking-server/internal/models"
 	"github.com/pArtour/networking-server/internal/validation"
-	"strconv"
 )
 
 // UserHandler is a struct that contains all handlers for users
@@ -17,48 +17,33 @@ type UserHandler struct {
 // NewUserHandler returns a new UserHandler struct
 func NewUserHandler(router fiber.Router, uc *controllers.UserController) {
 	usersRouter := router.Group("/users")
-	uh := &UserHandler{
+	h := &UserHandler{
 		controller: uc,
 	}
 
-	uh.setupUserRoutes(usersRouter)
+	h.setupUserRoutes(usersRouter)
 }
 
 // setupUserRoutes sets up all routes for users
-func (uh *UserHandler) setupUserRoutes(r fiber.Router) {
-	r.Get("/", uh.getUsersHandler)
-	r.Get("/:id", uh.getUserHandler)
-	r.Post("/", uh.createUserHandler)
-	r.Put("/:id", uh.updateUserHandler)
-	r.Delete("/:id", uh.deleteUserHandler)
+func (h *UserHandler) setupUserRoutes(r fiber.Router) {
+	r.Get("/", h.getUsersHandler)
+	r.Get("/me", h.getCurrentUserHandler)
+	r.Put("/", h.updateUserHandler)
+	r.Delete("/", h.deleteUserHandler)
 }
 
 // getUsersHandler handles GET /users
-func (uh *UserHandler) getUsersHandler(c *fiber.Ctx) error {
-	users, err := uh.controller.GetUsers()
+func (h *UserHandler) getUsersHandler(c *fiber.Ctx) error {
+	users, err := h.controller.GetUsers()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error fetching users"})
 	}
 	return c.JSON(users)
 }
 
-// getUserHandler handles GET /users/:id
-func (uh *UserHandler) getUserHandler(c *fiber.Ctx) error {
-	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid user ID"})
-	}
-	user, err := uh.controller.GetUserById(id)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error fetching user"})
-	}
-	return c.JSON(user)
-
-}
-
-// createUserHandler handles POST /users
-func (uh *UserHandler) createUserHandler(c *fiber.Ctx) error {
-	user := new(models.CreateUserBody)
+// registerUserHandler handles POST /users
+func (h *UserHandler) registerUserHandler(c *fiber.Ctx) error {
+	user := new(models.CreateUserInput)
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid request body"})
 	}
@@ -68,7 +53,7 @@ func (uh *UserHandler) createUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 
-	newUser, err := uh.controller.CreateUser(user)
+	newUser, err := h.controller.CreateUser(user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error creating user"})
 	}
@@ -76,12 +61,12 @@ func (uh *UserHandler) createUserHandler(c *fiber.Ctx) error {
 }
 
 // updateUserHandler handles PUT /users/:id
-func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
-	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+func (h *UserHandler) updateUserHandler(c *fiber.Ctx) error {
+	id, err := helpers.ExtractUserIDFromJWT(c)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid user ID"})
+		return c.Status(fiber.StatusUnauthorized).JSON(&errors.ErrorResponse{Code: fiber.StatusUnauthorized, Message: "Unauthorized"})
 	}
-	user := new(models.UpdateUserBody)
+	user := new(models.UpdateUserInput)
 
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid request body"})
@@ -92,12 +77,12 @@ func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 
-	_, err = uh.controller.GetUserById(id)
+	_, err = h.controller.GetUserById(id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(&errors.ErrorResponse{Code: fiber.StatusNotFound, Message: "User not found"})
 	}
 
-	err = uh.controller.UpdateUser(id, user)
+	err = h.controller.UpdateUser(id, user)
 	if err != nil {
 		return c.Status(500).SendString("Error updating handlers")
 	}
@@ -105,14 +90,29 @@ func (uh *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 }
 
 // deleteUserHandler handles DELETE /users/:id
-func (uh *UserHandler) deleteUserHandler(c *fiber.Ctx) error {
-	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+func (h *UserHandler) deleteUserHandler(c *fiber.Ctx) error {
+	id, err := helpers.ExtractUserIDFromJWT(c)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid handlers ID")
+		return c.Status(fiber.StatusUnauthorized).JSON(&errors.ErrorResponse{Code: fiber.StatusUnauthorized, Message: "Unauthorized"})
 	}
-	err = uh.controller.DeleteUser(id)
+	err = h.controller.DeleteUser(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Error deleting handlers")
 	}
 	return c.SendStatus(fiber.StatusOK)
+}
+
+// getCurrentUserHandler handles GET /users/:id (for the current user) and returns the current user
+func (h *UserHandler) getCurrentUserHandler(c *fiber.Ctx) error {
+	userId, err := helpers.ExtractUserIDFromJWT(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(&errors.ErrorResponse{Code: fiber.StatusUnauthorized, Message: "Unauthorized"})
+	}
+
+	user, err := h.controller.GetUserById(userId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error fetching user"})
+	}
+
+	return c.JSON(user)
 }
