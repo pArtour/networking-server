@@ -15,7 +15,7 @@ func NewAuthService(db *database.Db) *AuthService {
 	return &AuthService{db: db}
 }
 
-func (s AuthService) CheckUserCredentials(password string, user *models.User) error {
+func (s AuthService) CheckUserCredentials(password string, user *models.UserWithPassword) error {
 	if !helpers.CheckPasswordHash(password, user.Password) {
 		return errors.New("invalid credentials")
 	}

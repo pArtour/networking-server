@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pArtour/networking-server/internal/controllers"
 	"github.com/pArtour/networking-server/internal/errors"
@@ -56,7 +57,7 @@ func (h *UserHandler) registerUserHandler(c *fiber.Ctx) error {
 
 	newUser, err := h.controller.CreateUser(user)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error creating user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error creating user: %s", err)})
 	}
 	return c.JSON(newUser)
 }
