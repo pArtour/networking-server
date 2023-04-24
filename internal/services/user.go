@@ -42,7 +42,7 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 
 // GetUsersWithInterests returns all users with their interests
 func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error) {
-	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error
 	var user models.UserWithInterests
 	var interest models.Interest
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &interest.Id, &interest.Name)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error
 
 func (s *UserService) GetUserByEmail(email string) (*models.UserWithPassword, error) {
 	var user models.UserWithPassword
-	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name, email, password FROM users WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name, email, bio, profile_picture, password FROM users WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (s *UserService) GetUserByEmail(email string) (*models.UserWithPassword, er
 // CreateUser creates a new user
 func (s *UserService) CreateUser(body *models.CreateUserInput) (*models.User, error) {
 	var user models.User
-	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email", body.Name, body.Email, body.Password).Scan(&user.ID, &user.Name, &user.Email)
+	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name, email, password, bio, profile_picture) VALUES ($1, $2, $3) RETURNING id, name, email, bio, profile_picture", body.Name, body.Email, body.Password).Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (s *UserService) CreateUser(body *models.CreateUserInput) (*models.User, er
 
 // UpdateUser updates a user
 func (s *UserService) UpdateUser(id int64, body *models.UpdateUserInput) error {
-	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$2 email=$3 WHERE id=$1", id, body.Name, body.Email)
+	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$2 email=$3 bio=$4 profile_picture=$5 WHERE id=$1", id, body.Name, body.Email, body.Bio, body.ProfilePicture)
 	return err
 }
 

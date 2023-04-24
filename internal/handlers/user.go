@@ -113,7 +113,7 @@ func (h *UserHandler) getCurrentUserHandler(c *fiber.Ctx) error {
 
 	user, err := h.controller.GetUserById(userId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error fetching user"})
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error getting user: %s", err)})
 	}
 
 	return c.JSON(user)
