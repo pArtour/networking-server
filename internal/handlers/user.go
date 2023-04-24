@@ -86,7 +86,7 @@ func (h *UserHandler) updateUserHandler(c *fiber.Ctx) error {
 
 	err = h.controller.UpdateUser(id, user)
 	if err != nil {
-		return c.Status(500).SendString("Error updating handlers")
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error updating user: %s", err)})
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
