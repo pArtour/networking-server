@@ -85,7 +85,7 @@ func (s *UserService) CreateUser(body *models.CreateUserInput) (*models.User, er
 
 // UpdateUser updates a user
 func (s *UserService) UpdateUser(id int64, body *models.UpdateUserInput) error {
-	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$2 email=$3 bio=$4 profile_picture=$5 WHERE id=$1", id, &body.Name, &body.Email, &body.Bio, &body.ProfilePicture)
+	_, err := s.db.Conn.Exec(context.Background(), "UPDATE users SET name=$1, email=$2, bio=$3, profile_picture=$4 WHERE id=$5", &body.Name, &body.Email, &body.Bio, &body.ProfilePicture, id)
 	return err
 }
 
