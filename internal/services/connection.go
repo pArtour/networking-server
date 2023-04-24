@@ -18,7 +18,7 @@ func NewConnectionService(db *database.Db) *ConnectionService {
 
 // GetConnectionsByUserId returns all connections of a user
 func (s *ConnectionService) GetConnectionsByUserId(userId int64) ([]models.Connection, error) {
-	rows, err := s.Db.Conn.Query(context.Background(), "SELECT c.id, c.user_1_id, c.user_2_id, c.created_at FROM connections c WHERE c.user_id_1 = $1", userId)
+	rows, err := s.Db.Conn.Query(context.Background(), "SELECT c.id, c.user_id_1, c.user_id_2 FROM connections c WHERE c.user_id_1 = $1", userId)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (s *ConnectionService) GetConnectionsByUserId(userId int64) ([]models.Conne
 	var connections []models.Connection
 	for rows.Next() {
 		var connection models.Connection
-		err := rows.Scan(&connection.Id, &connection.UserId1, &connection.UserId2, &connection.CreatedAt)
+		err := rows.Scan(&connection.Id, &connection.UserId1, &connection.UserId2)
 		if err != nil {
 			return nil, err
 		}
