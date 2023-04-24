@@ -20,8 +20,8 @@ func NewUserController(us *services.UserService, as *services.AuthService) *User
 }
 
 // GetUsers returns all users
-func (c *UserController) GetUsers() ([]models.User, error) {
-	users, err := c.userService.GetUsers()
+func (c *UserController) GetUsers() ([]models.UserWithInterests, error) {
+	users, err := c.userService.GetUsersWithInterests()
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +70,14 @@ func (c *UserController) UpdateUser(id int64, body *models.UpdateUserInput) erro
 // DeleteUser deletes a user
 func (c *UserController) DeleteUser(id int64) error {
 	err := c.userService.DeleteUser(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *UserController) CreateUserInterest(userId, interestId int64) error {
+	err := c.userService.LinkUserToInterest(userId, interestId)
 	if err != nil {
 		return err
 	}

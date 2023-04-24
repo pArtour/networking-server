@@ -29,10 +29,35 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.ID, &user.Name)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email)
 		if err != nil {
 			return nil, err
 		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+// GetUsersWithInterests returns all users with their interests
+func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error) {
+	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, i.id, i.name FROM users u JOIN users_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.UserWithInterests
+	var user models.UserWithInterests
+	var interest models.Interest
+	for rows.Next() {
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &interest.Id, &interest.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		user.Interests = append(user.Interests, interest)
 		users = append(users, user)
 	}
 
@@ -78,4 +103,13 @@ func (s *UserService) GetUser(id int64) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// LinkUserToInterest links a user to an interest in the database
+func (s *UserService) LinkUserToInterest(userID int64, interestID int64) error {
+	_, err := s.db.Conn.Exec(context.Background(), "INSERT INTO user_interests (user_id, interest_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", userID, interestID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

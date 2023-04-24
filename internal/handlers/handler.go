@@ -9,10 +9,14 @@ import (
 type Handlers struct {
 	Uh *UserHandler
 	Ah *AuthHandler
+	Ch *ConnectionHandler
+	Ic *InterestHandler
 }
 
 // NewHandlers returns a new Handlers struct
 func NewHandlers(router fiber.Router, c *controllers.Controllers) {
 	NewUserHandler(router, c.UserController)
 	NewAuthHandler(router, c.UserController)
+	NewConnectionHandler(router, c.ConnectionController)
+	NewInterestHandler(router, c.InterestController)
 }

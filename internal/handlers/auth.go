@@ -50,15 +50,16 @@ func (h *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 
 // RegisterHandler is a function that handles the register route
 func (h *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
-	//type RegisterInput struct {
-	//	Name           string `json:"name" validate:"required,min=2,max=100"`
-	//	Email          string `json:"email" validate:"required,email"`
-	//	Password       string `json:"password" validate:"required,min=8"`
-	//	Bio            string `json:"bio" validate:"max=300"`
-	//	ProfilePicture string `json:"profile_picture" validate:"url"`
-	//}
+	type RegisterUserInput struct {
+		Name           string                             `json:"name" validate:"required,min=1,max=32"`
+		Email          string                             `json:"email" validate:"required,email"`
+		Password       string                             `json:"password" validate:"required,min=8"`
+		ProfilePicture string                             `json:"profile_picture"`
+		Bio            string                             `json:"bio" validate:"required,min=25"`
+		Interests      []models.RegisterUserInputInterest `json:"interests" validate:"required"`
+	}
 
-	var input models.CreateUserInput
+	var input RegisterUserInput
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid input"})
 	}
@@ -76,9 +77,16 @@ func (h *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 	input.Password = hashedPassword
 
-	newUser, err := h.controller.CreateUser(&input)
+	newUser, err := h.controller.CreateUser(&models.CreateUserInput{Email: input.Email, Name: input.Name, Password: input.Password, Bio: input.Bio, ProfilePicture: input.ProfilePicture})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error creating user: %s", err)})
+	}
+
+	for _, interest := range input.Interests {
+		err = h.controller.CreateUserInterest(newUser.ID, interest.ID)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error creating user: %s", err)})
+		}
 	}
 
 	token, err := helpers.GenerateJWTToken(newUser.ID)
