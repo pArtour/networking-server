@@ -98,7 +98,7 @@ func (s *UserService) DeleteUser(id int64) error {
 // GetUser returns a user
 func (s *UserService) GetUser(id int64) (*models.User, error) {
 	var user models.User
-	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name FROM users WHERE id=$1", id).Scan(&user.ID, &user.Name)
+	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name, email, bio, profile_picture FROM users WHERE id=$1", id).Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture)
 	if err != nil {
 		return nil, err
 	}

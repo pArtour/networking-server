@@ -38,7 +38,7 @@ func (h *UserHandler) setupUserRoutes(r fiber.Router) {
 func (h *UserHandler) getUsersHandler(c *fiber.Ctx) error {
 	users, err := h.controller.GetUsers()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error fetching users"})
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error getting users: %s", err)})
 	}
 	return c.JSON(users)
 }
