@@ -49,7 +49,7 @@ func (s *InterestService) CreateInterest(body *models.CreateInterestInput) (*mod
 
 // GetInterestsByUserId returns all interests of a user
 func (s *InterestService) GetInterestsByUserId(userId int64) ([]models.Interest, error) {
-	rows, err := s.db.Conn.Query(context.Background(), "SELECT i.id, i.name FROM interests i JOIN users_interests ui ON i.id = ui.interest_id WHERE ui.user_id = $1", userId)
+	rows, err := s.db.Conn.Query(context.Background(), "SELECT i.id, i.name FROM interests i JOIN user_interests ui ON i.id = ui.interest_id WHERE ui.user_id = $1", userId)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (s *InterestService) GetInterestsByUserId(userId int64) ([]models.Interest,
 
 // AddInterestToUser adds an interest to a user
 func (s *InterestService) AddInterestToUser(body *models.AddInterestToUserInput) error {
-	_, err := s.db.Conn.Query(context.Background(), "INSERT INTO users_interests (user_id, interest_id) VALUES ($1, $2) RETURNING id, name", body.UserId, body.InterestId)
+	_, err := s.db.Conn.Query(context.Background(), "INSERT INTO user_interests (user_id, interest_id) VALUES ($1, $2) RETURNING id, name", body.UserId, body.InterestId)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (s *InterestService) AddInterestToUser(body *models.AddInterestToUserInput)
 
 // DeleteInterestFromUser deletes an interest from a user
 func (s *InterestService) DeleteInterestFromUser(userId, interestId int64) error {
-	_, err := s.db.Conn.Query(context.Background(), "DELETE FROM users_interests WHERE user_id = $1 AND interest_id = $2", userId, interestId)
+	_, err := s.db.Conn.Query(context.Background(), "DELETE FROM user_interests WHERE user_id = $1 AND interest_id = $2", userId, interestId)
 	if err != nil {
 		return err
 	}

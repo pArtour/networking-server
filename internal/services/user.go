@@ -42,7 +42,7 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 
 // GetUsersWithInterests returns all users with their interests
 func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error) {
-	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, i.id, i.name FROM users u JOIN users_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
 	if err != nil {
 		return nil, err
 	}
