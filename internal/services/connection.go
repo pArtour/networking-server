@@ -34,13 +34,17 @@ func (s *ConnectionService) GetConnectionsByUserId(userId int64) ([]models.Conne
 		connections = append(connections, connection)
 	}
 
+	if connections == nil {
+		return []models.Connection{}, nil
+	}
+
 	return connections, nil
 }
 
 // CreateConnection creates a new connection.
 func (s *ConnectionService) CreateConnection(body *models.CreateConnectionRecordInput) (*models.Connection, error) {
 	var connection models.Connection
-	err := s.Db.Conn.QueryRow(context.Background(), "INSERT INTO connections (user_id_1, user_id_2) VALUES ($1, $2) RETURNING id, user_id_1, user_id_2, created_at", body.UserId, body.TargetUserId).Scan(&connection.Id, &connection.UserId1, &connection.UserId2, &connection.CreatedAt)
+	err := s.Db.Conn.QueryRow(context.Background(), "INSERT INTO connections (user_id_1, user_id_2) VALUES ($1, $2) RETURNING id, user_id_1, user_id_2", body.UserId, body.TargetUserId).Scan(&connection.Id, &connection.UserId1, &connection.UserId2)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +63,7 @@ func (s *ConnectionService) DeleteConnection(id int64) error {
 // GetConnectionById returns a connection by id
 func (s *ConnectionService) GetConnectionById(id int64) (*models.Connection, error) {
 	var connection models.Connection
-	err := s.Db.Conn.QueryRow(context.Background(), "SELECT id, user_id_1, user_id_2, created_at FROM connections WHERE id = $1", id).Scan(&connection.Id, &connection.UserId1, &connection.UserId2, &connection.CreatedAt)
+	err := s.Db.Conn.QueryRow(context.Background(), "SELECT id, user_id_1, user_id_2 FROM connections WHERE id = $1", id).Scan(&connection.Id, &connection.UserId1, &connection.UserId2)
 	if err != nil {
 		return nil, err
 	}
