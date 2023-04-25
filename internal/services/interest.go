@@ -70,7 +70,7 @@ func (s *InterestService) GetInterestsByUserId(userId int64) ([]models.Interest,
 
 // AddInterestToUser adds an interest to a user
 func (s *InterestService) AddInterestToUser(body *models.AddInterestToUserInput) error {
-	_, err := s.db.Conn.Query(context.Background(), "INSERT INTO user_interests (user_id, interest_id) VALUES ($1, $2) RETURNING id, name", body.UserId, body.InterestId)
+	_, err := s.db.Conn.Query(context.Background(), "INSERT INTO user_interests (user_id, interest_id) VALUES ($1, $2)", body.UserId, body.InterestId)
 	if err != nil {
 		return err
 	}

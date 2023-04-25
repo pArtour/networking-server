@@ -22,7 +22,6 @@ func NewConnectionHandler(router fiber.Router, controller *controllers.Connectio
 	connectionsRouter.Post("/", handler.CreateConnection)
 	connectionsRouter.Delete("/:id", handler.DeleteConnection)
 	connectionsRouter.Get("/:id", handler.GetConnectionById)
-	connectionsRouter.Delete("/me/:id", handler.DeleteCurrentUserConnection)
 }
 
 // GetUserConnections returns all connections for a user
@@ -61,11 +60,15 @@ func (h *ConnectionHandler) CreateConnection(c *fiber.Ctx) error {
 
 // DeleteConnection deletes a connection
 func (h *ConnectionHandler) DeleteConnection(c *fiber.Ctx) error {
+	userId, err := helpers.ExtractUserIDFromJWT(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: err.Error()})
 	}
-	err = h.controller.DeleteConnection(int64(id))
+	err = h.controller.DeleteUserConnection(int64(id), userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
@@ -83,21 +86,4 @@ func (h *ConnectionHandler) GetConnectionById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 	return c.JSON(connection)
-}
-
-// DeleteCurrentUserConnection deletes a connection for the current user
-func (h *ConnectionHandler) DeleteCurrentUserConnection(c *fiber.Ctx) error {
-	userId, err := helpers.ExtractUserIDFromJWT(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-	id, err := c.ParamsInt("id")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: err.Error()})
-	}
-	err = h.controller.DeleteUserConnection(int64(id), userId)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
-	}
-	return c.SendStatus(fiber.StatusOK)
 }
