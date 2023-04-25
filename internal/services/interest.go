@@ -78,7 +78,7 @@ func (s *InterestService) AddInterestToUser(body *models.AddInterestToUserInput)
 }
 
 // DeleteInterestFromUser deletes an interest from a user
-func (s *InterestService) DeleteInterestFromUser(userId, interestId int64) error {
+func (s *InterestService) DeleteInterestFromUser(userId int64, interestId int64) error {
 	_, err := s.db.Conn.Query(context.Background(), "DELETE FROM user_interests WHERE user_id = $1 AND interest_id = $2", userId, interestId)
 	if err != nil {
 		return err
