@@ -19,4 +19,5 @@ func NewHandlers(router fiber.Router, c *controllers.Controllers) {
 	NewAuthHandler(router, c.UserController)
 	NewConnectionHandler(router, c.ConnectionController)
 	NewInterestHandler(router, c.InterestController)
+	NewChatHandler(router, c.MessageController)
 }

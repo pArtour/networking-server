@@ -7,6 +7,7 @@ type Controllers struct {
 	UserController       *UserController
 	ConnectionController *ConnectionController
 	InterestController   *InterestController
+	MessageController    *MessageController
 }
 
 // NewControllers returns a new Controllers struct
@@ -15,5 +16,6 @@ func NewControllers(s *services.Services) *Controllers {
 		UserController:       NewUserController(s.Us, s.As),
 		ConnectionController: NewConnectionController(s.Cs),
 		InterestController:   NewInterestController(s.Is),
+		MessageController:    NewMessageController(s.Ms),
 	}
 }

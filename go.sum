@@ -12,6 +12,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
+github.com/fasthttp/websocket v1.5.2 h1:KdCb0EpLpdJpfE3IPA5YLK/aYBO3dhZcvwxz6tXe2LQ=
+github.com/fasthttp/websocket v1.5.2/go.mod h1:S0KC1VBlx1SaXGXq7yi1wKz4jMub58qEnHQG9oHuqBw=
 github.com/go-kit/log v0.1.0/go.mod h1:zbhenjAZHb184qTLMA9ZjW7ThYL0H2mk7Q6pNt4vbaY=
 github.com/go-logfmt/logfmt v0.5.0/go.mod h1:wCYkCAKZfumFQihp8CzCvQ3paCTfi41vtzG1KdI/P7A=
 github.com/go-playground/locales v0.14.1 h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
@@ -25,6 +27,8 @@ github.com/gofiber/fiber/v2 v2.44.0 h1:Z90bEvPcJM5GFJnu1py0E1ojoerkyew3iiNJ78MQC
 github.com/gofiber/fiber/v2 v2.44.0/go.mod h1:VTMtb/au8g01iqvHyaCzftuM/xmZgKOZCtFzz6CdV9w=
 github.com/gofiber/jwt/v3 v3.3.9 h1:vPNg8FNsF+rBUi9wvaqj0q4H2BRqz6rTyQmvIM6ko4Y=
 github.com/gofiber/jwt/v3 v3.3.9/go.mod h1:ZijRDaj14kALpaMm2F+sNaZuwqCQS6CG1QoDCHN1h/o=
+github.com/gofiber/websocket/v2 v2.1.6 h1:k4z+YqzGUwbCQJCIW+mDJF2iCcBfRY7BJGUa2k+VHXo=
+github.com/gofiber/websocket/v2 v2.1.6/go.mod h1:o+oXFwHjavIiM2KWo/MNpcIOruS0am16h3efqnjXLis=
 github.com/gofrs/uuid v4.0.0+incompatible h1:1SD/1F5pU8p29ybwgQSwpQk+mwdRrXCYuPhW6m+TnJw=
 github.com/gofrs/uuid v4.0.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/golang-jwt/jwt/v4 v4.5.0 h1:7cYmW1XlMY7h7ii7UhUyChSgS5wUJEnm9uZVTGqOWzg=
