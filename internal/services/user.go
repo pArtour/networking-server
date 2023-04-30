@@ -76,7 +76,7 @@ func (s *UserService) GetUserByEmail(email string) (*models.UserWithPassword, er
 // CreateUser creates a new user
 func (s *UserService) CreateUser(body *models.CreateUserInput) (*models.User, error) {
 	var user models.User
-	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name, email, password, bio, profile_picture) VALUES ($1, $2, $3) RETURNING id, name, email, bio, profile_picture", body.Name, body.Email, body.Password).Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture)
+	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO users (name, email, password, bio, profile_picture) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, bio, profile_picture", body.Name, body.Email, body.Password, body.Bio, body.ProfilePicture).Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture)
 	if err != nil {
 		return nil, err
 	}
