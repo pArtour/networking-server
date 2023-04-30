@@ -17,11 +17,10 @@ func NewInterestHandler(router fiber.Router, ic *controllers.InterestController)
 	handler := &InterestHandler{
 		interestController: ic,
 	}
-	interestRouter := router.Group("/interests", middleware.JWTProtected())
-	interestRouter.Get("/", handler.GetInterests)
-	interestRouter.Get("/me", handler.GetUserInterests)
-	interestRouter.Post("/:id", handler.AddInterest)
-	interestRouter.Delete("/:id", handler.DeleteInterest)
+	router.Get("/interests", handler.GetInterests)
+	router.Get("/interests/me", handler.GetUserInterests, middleware.JWTProtected())
+	router.Post("/interests/:id", handler.AddInterest, middleware.JWTProtected())
+	router.Delete("/interests/:id", handler.DeleteInterest, middleware.JWTProtected())
 }
 
 // GetCurrentUserInterests returns all interests for a user
