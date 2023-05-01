@@ -96,34 +96,63 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 
 // GetRestUsers returns all users with their interests that don't have connection with input user
 func (s *UserService) GetRestUsers(userId int64) ([]models.UserWithInterests, error) {
-	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+	query := `
+        SELECT 
+            u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name
+        FROM 
+            users u
+        JOIN 
+            user_interests ui ON u.id = ui.user_id
+        JOIN 
+            interests i ON i.id = ui.interest_id
+        WHERE 
+            u.id <> $1 AND
+            u.id NOT IN (
+                SELECT 
+                    c.user_id2 
+                FROM 
+                    connections c 
+                WHERE 
+                    c.user_id1 = $1
+                UNION
+                SELECT 
+                    c.user_id1 
+                FROM 
+                    connections c 
+                WHERE 
+                    c.user_id2 = $1
+            )
+    `
+	rows, err := s.db.Conn.Query(context.Background(), query, userId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []models.UserWithInterests
-	var user models.UserWithInterests
-	var interest models.Interest
+	users := make(map[int64]models.UserWithInterests)
 	for rows.Next() {
+		var user models.UserWithInterests
+		var interest models.Interest
 		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
 		if err != nil {
 			return nil, err
 		}
 
-		user.Interests = append(user.Interests, interest)
-		users = append(users, user)
-	}
-
-	// Filter users that have connection with input user
-	var filteredUsers []models.UserWithInterests
-	for _, user := range users {
-		if user.ID != userId {
-			filteredUsers = append(filteredUsers, user)
+		if existingUser, ok := users[user.ID]; ok {
+			existingUser.Interests = append(existingUser.Interests, interest)
+			users[user.ID] = existingUser
+		} else {
+			user.Interests = append(user.Interests, interest)
+			users[user.ID] = user
 		}
 	}
 
-	// Get connections
+	// Convert map to slice
+	var filteredUsers []models.UserWithInterests
+	for _, user := range users {
+		filteredUsers = append(filteredUsers, user)
+	}
+
 	return filteredUsers, nil
 }
 
