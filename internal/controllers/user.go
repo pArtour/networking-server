@@ -83,3 +83,12 @@ func (c *UserController) CreateUserInterest(userId, interestId int64) error {
 	}
 	return nil
 }
+
+// GetUser returns a user
+func (c *UserController) GetUser(id int64) (*models.User, error) {
+	user, err := c.userService.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}

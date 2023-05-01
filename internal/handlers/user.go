@@ -30,6 +30,7 @@ func NewUserHandler(router fiber.Router, uc *controllers.UserController) {
 func (h *UserHandler) setupUserRoutes(r fiber.Router) {
 	r.Get("/", h.getUsersHandler)
 	r.Get("/me", h.getCurrentUserHandler)
+	r.Get("/:id", h.getUserHandler)
 	r.Put("/", h.updateUserHandler)
 	r.Delete("/", h.deleteUserHandler)
 }
@@ -41,6 +42,20 @@ func (h *UserHandler) getUsersHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error getting users: %s", err)})
 	}
 	return c.JSON(users)
+}
+
+// getUserHandler handles GET /users/:id
+func (h *UserHandler) getUserHandler(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: err.Error()})
+	}
+
+	user, err := h.controller.GetUser(int64(id))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error getting user: %s", err)})
+	}
+	return c.JSON(user)
 }
 
 // registerUserHandler handles POST /users
