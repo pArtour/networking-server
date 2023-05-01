@@ -46,7 +46,7 @@ func (c *UserController) LoginUser(email, password string) (*models.User, error)
 	if err != nil {
 		return nil, err
 	}
-	return &models.User{Name: user.Name, ID: user.ID, Email: user.Email}, nil
+	return &models.User{Name: user.Name, ID: user.ID, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture}, nil
 }
 
 // CreateUser creates a new user
