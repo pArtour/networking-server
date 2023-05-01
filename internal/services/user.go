@@ -40,7 +40,7 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInterests, error) {
+func (s *UserService) GetRestUsers(userId int64) ([]models.User, error) {
 	query := `
         SELECT 
             u.id, 
@@ -71,39 +71,22 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
             u.id;
     `
 
-	userRows, err := s.db.Conn.Query(context.Background(), query, userId)
+	rows, err := s.db.Conn.Query(context.Background(), query, userId)
 	if err != nil {
 		return nil, err
 	}
-	defer userRows.Close()
+	defer rows.Close()
 
-	var users []models.UserWithInterests
-	var user models.UserWithInterests
-	var interest models.Interest
-	for userRows.Next() {
-		err := userRows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture)
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Bio, &user.ProfilePicture)
 		if err != nil {
 			return nil, err
 		}
 
-		interestRows, err := s.db.Conn.Query(context.Background(), "SELECT i.id, i.name FROM interests i INNER JOIN user_interests ui ON i.id = ui.interest_id WHERE ui.user_id = $1", user.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		for interestRows.Next() {
-			err := interestRows.Scan(&interest.Id, &interest.Name)
-			if err != nil {
-				return nil, err
-			}
-			user.Interests = append(user.Interests, interest)
-		}
 		users = append(users, user)
-		interestRows.Close()
-	}
 
-	if err = userRows.Err(); err != nil {
-		return nil, err
 	}
 
 	return users, nil
