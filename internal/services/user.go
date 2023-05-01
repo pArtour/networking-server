@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/lib/pq"
 	"github.com/pArtour/networking-server/internal/database"
 	"github.com/pArtour/networking-server/internal/models"
 )
@@ -40,25 +41,94 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-// GetUsersWithInterests returns all users with their interests
-func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error) {
-	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+// GetUsersWithInterests returns all users with their interests that don't have connection with input user
+//func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInterests, error) {
+//	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer rows.Close()
+//
+//	var users []models.UserWithInterests
+//	var user models.UserWithInterests
+//	var interest models.Interest
+//	for rows.Next() {
+//		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		user.Interests = append(user.Interests, interest)
+//		users = append(users, user)
+//	}
+//
+//	// Filter users that have connection with input user
+//	var filteredUsers []models.UserWithInterests
+//	for _, user := range users {
+//		if user.ID != userId {
+//			filteredUsers = append(filteredUsers, user)
+//		}
+//	}
+//
+//	// Get connections
+//
+//	return filteredUsers, nil
+//}
+
+func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInterests, error) {
+	query := `
+        SELECT 
+            u.id, 
+            u.email,
+            u.name,
+            u.bio,
+            u.profile_picture,
+            array_agg(i.name) AS interests
+        FROM 
+            users u
+        JOIN 
+            user_interests ui ON ui.user_id = u.id
+        JOIN 
+            interests i ON i.id = ui.interest_id
+        WHERE 
+            u.id <> $1 AND
+            u.id NOT IN (
+                SELECT 
+                    c.user_id_2 
+                FROM 
+                    connections c 
+                WHERE 
+                    c.user_id_1 = $1
+                UNION
+                SELECT 
+                    c.user_id_1 
+                FROM 
+                    connections c 
+                WHERE 
+                    c.user_id_2 = $1
+            )
+        GROUP BY 
+            u.id;
+    `
+
+	rows, err := s.db.Conn.Query(context.Background(), query, userId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var users []models.UserWithInterests
-	var user models.UserWithInterests
-	var interest models.Interest
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
+		var user models.UserWithInterests
+		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Bio, &user.ProfilePicture, pq.Array(&user.Interests))
 		if err != nil {
 			return nil, err
 		}
-
-		user.Interests = append(user.Interests, interest)
 		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return users, nil
