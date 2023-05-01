@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/pArtour/networking-server/internal/chat"
@@ -95,7 +96,7 @@ func (h *ChatHandler) GetChatHistoryHandler(c *fiber.Ctx) error {
 	// Fetch the chat history from the database
 	messages, err := h.controller.GetMessagesBetweenUsers(userID1, userID2)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: "Error fetching chat history"})
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch chat history: %s", err.Error())})
 	}
 
 	return c.JSON(messages)
