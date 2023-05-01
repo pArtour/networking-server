@@ -24,7 +24,7 @@ func NewChatHandler(router fiber.Router, c *controllers.MessageController) {
 	h := &ChatHandler{
 		controller: c,
 	}
-
+	chat.Post("/:connectionId", h.CreateMessageHandler, middleware.JWTProtected())
 	chat.Get("/:connectionId", h.ChatHandler, middleware.JWTProtected(), websocket.New(h.WebSocketHandler))
 	messages.Get("/:connectionId", h.GetChatHistoryHandler, middleware.JWTProtected())
 }
@@ -112,4 +112,38 @@ func (h *ChatHandler) GetChatHistoryHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(messages)
+}
+
+func (h *ChatHandler) CreateMessageHandler(c *fiber.Ctx) error {
+	// Extract the user ID from the JWT token
+	userID, err := helpers.ExtractUserIDFromJWT(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+
+	// Extract the connection ID from the URL
+	connectionID, err := strconv.ParseInt(c.Params("connectionId"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid connection ID"})
+	}
+
+	// Extract the receiver ID and content from the request body
+	var body models.CreateMessageInput
+	err = c.BodyParser(&body)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(&errors.ErrorResponse{Code: fiber.StatusBadRequest, Message: "Invalid request body"})
+	}
+
+	// Save the message in the database
+	message, err := h.controller.CreateMessage(&models.CreateMessageInput{
+		SenderId:     userID,
+		ReceiverId:   body.ReceiverId,
+		ConnectionId: connectionID,
+		Message:      body.Message,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Failed to save message: %s", err.Error())})
+	}
+
+	return c.JSON(message)
 }
