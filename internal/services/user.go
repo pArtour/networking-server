@@ -40,41 +40,6 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-// GetUsersWithInterests returns all users with their interests that don't have connection with input user
-//func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInterests, error) {
-// query := "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id"
-//	rows, err := s.db.Conn.Query(context.Background(), query)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer rows.Close()
-//
-//	var users []models.UserWithInterests
-//	var user models.UserWithInterests
-//	var interest models.Interest
-//	for rows.Next() {
-//		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		user.Interests = append(user.Interests, interest)
-//		users = append(users, user)
-//	}
-//
-//	// Filter users that have connection with input user
-//	var filteredUsers []models.UserWithInterests
-//	for _, user := range users {
-//		if user.ID != userId {
-//			filteredUsers = append(filteredUsers, user)
-//		}
-//	}
-//
-//	// Get connections
-//
-//	return filteredUsers, nil
-//}
-
 func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInterests, error) {
 	query := `
         SELECT 
@@ -82,15 +47,9 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
             u.email,
             u.name,
             u.bio,
-            u.profile_picture,
-            i.id,
-            i.name
+            u.profile_picture
         FROM 
             users u
-        JOIN 
-            user_interests ui ON ui.user_id = u.id
-        JOIN 
-            interests i ON i.id = ui.interest_id
         WHERE 
             u.id <> $1 AND
             u.id NOT IN (
@@ -110,29 +69,41 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
             )
         GROUP BY 
             u.id,
-            i.id;
     `
 
-	rows, err := s.db.Conn.Query(context.Background(), query, userId)
+	userRows, err := s.db.Conn.Query(context.Background(), query, userId)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer userRows.Close()
 
 	var users []models.UserWithInterests
 	var user models.UserWithInterests
 	var interest models.Interest
-	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
+	for userRows.Next() {
+		err := userRows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture)
 		if err != nil {
 			return nil, err
 		}
 
-		user.Interests = append(user.Interests, interest)
+		interestRows, err := s.db.Conn.Query(context.Background(), "SELECT i.id, i.name FROM interests i INNER JOIN user_interests ui ON i.id = ui.interest_id WHERE ui.user_id = $1", user.ID)
+		if err != nil {
+			return nil, err
+		}
+		defer interestRows.Close()
+
+		for interestRows.Next() {
+			err := interestRows.Scan(&interest.Id, &interest.Name)
+			if err != nil {
+				return nil, err
+			}
+			user.Interests = append(user.Interests, interest)
+		}
+
 		users = append(users, user)
 	}
 
-	if err = rows.Err(); err != nil {
+	if err = userRows.Err(); err != nil {
 		return nil, err
 	}
 
