@@ -42,7 +42,7 @@ func GetConnectionByID(ConnID int64) *Connection {
 
 func BroadcastMessage(ConnID int64, message string) {
 	for _, conn := range connections {
-		if conn.ConnID != ConnID {
+		if conn.ConnID == ConnID {
 			conn.Conn.WriteMessage(websocket.TextMessage, []byte(message))
 		}
 	}
