@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"github.com/lib/pq"
 	"github.com/pArtour/networking-server/internal/database"
 	"github.com/pArtour/networking-server/internal/models"
 )
@@ -43,7 +42,8 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 
 // GetUsersWithInterests returns all users with their interests that don't have connection with input user
 //func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInterests, error) {
-//	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
+// query := "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id"
+//	rows, err := s.db.Conn.Query(context.Background(), query)
 //	if err != nil {
 //		return nil, err
 //	}
@@ -83,7 +83,8 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
             u.name,
             u.bio,
             u.profile_picture,
-            array_agg(i.name) AS interests
+            i.id,
+            i.name
         FROM 
             users u
         JOIN 
@@ -118,12 +119,15 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
 	defer rows.Close()
 
 	var users []models.UserWithInterests
+	var user models.UserWithInterests
+	var interest models.Interest
 	for rows.Next() {
-		var user models.UserWithInterests
-		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Bio, &user.ProfilePicture, pq.Array(&user.Interests))
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
 		if err != nil {
 			return nil, err
 		}
+
+		user.Interests = append(user.Interests, interest)
 		users = append(users, user)
 	}
 
