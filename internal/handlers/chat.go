@@ -23,7 +23,7 @@ func NewChatHandler(router fiber.Router, c *controllers.MessageController) {
 	}
 
 	router.Get("/chat", h.ChatHandler, middleware.JWTProtected(), websocket.New(h.WebSocketHandler))
-	router.Get("/chat/:userId", h.GetChatHistoryHandler, middleware.JWTProtected())
+	router.Get("/messages/:userId", h.GetChatHistoryHandler, middleware.JWTProtected())
 }
 
 func (h *ChatHandler) ChatHandler(c *fiber.Ctx) error {
@@ -84,7 +84,6 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 }
 
 func (h *ChatHandler) GetChatHistoryHandler(c *fiber.Ctx) error {
-	// Extract the user IDs from the URL
 	userID1, err := helpers.ExtractUserIDFromJWT(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
