@@ -40,7 +40,7 @@ func (s *MessageService) GetMessagesByConnection(connectionId int64) ([]models.M
 // CreateMessage creates a new message and returns it
 func (s *MessageService) CreateMessage(body *models.CreateMessageInput) (*models.Message, error) {
 	var message models.Message
-	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO messages (sender_id, receiver_id, message) VALUES ($1, $2, $3) RETURNING id, sender_id, receiver_id, message", body.SenderId, body.ReceiverId, body.Message).Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.Message)
+	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO messages (sender_id, receiver_id, connection_id, message) VALUES ($1, $2, $3, $4) RETURNING id, sender_id, receiver_id, connection_id, message", body.SenderId, body.ReceiverId, body.ConnectionId, body.Message).Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.ConnectionId, &message.Message)
 	if err != nil {
 		return nil, err
 	}
