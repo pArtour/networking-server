@@ -7,23 +7,23 @@ import (
 )
 
 type Connection struct {
-	UserID int64
+	ConnID int64
 	Conn   *websocket.Conn
 }
 
 var connections = make([]*Connection, 0)
 var connMutex sync.Mutex
 
-func AddConnection(userID int64, conn *websocket.Conn) {
+func AddConnection(ConnID int64, conn *websocket.Conn) {
 	connMutex.Lock()
-	connections = append(connections, &Connection{UserID: userID, Conn: conn})
+	connections = append(connections, &Connection{ConnID: ConnID, Conn: conn})
 	connMutex.Unlock()
 }
 
-func RemoveConnection(userID int64) {
+func RemoveConnection(connID int64) {
 	connMutex.Lock()
 	for i, conn := range connections {
-		if conn.UserID == userID {
+		if conn.ConnID == connID {
 			connections = append(connections[:i], connections[i+1:]...)
 			break
 		}
@@ -31,18 +31,18 @@ func RemoveConnection(userID int64) {
 	connMutex.Unlock()
 }
 
-func GetConnectionByUserID(userID int64) *Connection {
+func GetConnectionByID(ConnID int64) *Connection {
 	for _, conn := range connections {
-		if conn.UserID == userID {
+		if conn.ConnID == ConnID {
 			return conn
 		}
 	}
 	return nil
 }
 
-func BroadcastMessage(senderID int64, message string) {
+func BroadcastMessage(ConnID int64, message string) {
 	for _, conn := range connections {
-		if conn.UserID != senderID {
+		if conn.ConnID != ConnID {
 			conn.Conn.WriteMessage(websocket.TextMessage, []byte(message))
 		}
 	}

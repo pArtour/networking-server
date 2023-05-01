@@ -25,7 +25,7 @@ func NewChatHandler(router fiber.Router, c *controllers.MessageController) {
 		controller: c,
 	}
 
-	chat.Get("/", h.ChatHandler, middleware.JWTProtected(), websocket.New(h.WebSocketHandler))
+	chat.Get("/:connectionId", h.ChatHandler, middleware.JWTProtected(), websocket.New(h.WebSocketHandler))
 	messages.Get("/:userId", h.GetChatHistoryHandler, middleware.JWTProtected())
 }
 
@@ -40,7 +40,16 @@ func (h *ChatHandler) ChatHandler(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
+	// Extract the connection ID from the URL
+	connectionID, err := strconv.ParseInt(c.Params("connectionId"), 10, 64)
+	if err != nil {
+		c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "invalid connection ID"))
+		c.Close()
+		return
+	}
+
 	// Extract the user ID from the JWT token
+
 	userID, err := helpers.ExtractUserIDFromWebsocketJWT(c)
 	if err != nil {
 		c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "invalid token"))
@@ -49,8 +58,8 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 	}
 
 	// Add the WebSocket connection to the connections list
-	chat.AddConnection(userID, c)
-	defer chat.RemoveConnection(userID)
+	chat.AddConnection(connectionID, c)
+	defer chat.RemoveConnection(connectionID)
 
 	// Read messages from the WebSocket and broadcast them to all other connected users
 	for {
@@ -82,7 +91,7 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 			continue
 		}
 
-		chat.BroadcastMessage(userID, string(message))
+		chat.BroadcastMessage(connectionID, string(message))
 	}
 }
 
