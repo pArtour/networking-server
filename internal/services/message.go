@@ -27,7 +27,7 @@ func (s *MessageService) GetMessagesByConnection(connectionId int64) ([]models.M
 	var messages []models.Message
 	for rows.Next() {
 		var message models.Message
-		err := rows.Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.Message)
+		err := rows.Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.ConnectionId, &message.Message)
 		if err != nil {
 			return nil, err
 		}
