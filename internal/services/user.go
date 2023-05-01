@@ -109,18 +109,18 @@ func (s *UserService) GetRestUsers(userId int64) ([]models.UserWithInterests, er
             u.id <> $1 AND
             u.id NOT IN (
                 SELECT 
-                    c.user_id2 
+                    c.user_id_2 
                 FROM 
                     connections c 
                 WHERE 
-                    c.user_id1 = $1
+                    c.user_id_1 = $1
                 UNION
                 SELECT 
-                    c.user_id1 
+                    c.user_id_1 
                 FROM 
                     connections c 
                 WHERE 
-                    c.user_id2 = $1
+                    c.user_id_2 = $1
             )
     `
 	rows, err := s.db.Conn.Query(context.Background(), query, userId)
