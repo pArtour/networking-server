@@ -18,7 +18,7 @@ func NewInterestHandler(router fiber.Router, ic *controllers.InterestController)
 		interestController: ic,
 	}
 	router.Get("/interests", handler.GetInterests)
-	router.Get("/interests/:id", handler.GetUserInterests, middleware.JWTProtected())
+	router.Get("/interests/:id", handler.GetUserInterestsById, middleware.JWTProtected())
 	router.Get("/interests/me", handler.GetUserInterests, middleware.JWTProtected())
 	router.Post("/interests/:id", handler.AddInterest, middleware.JWTProtected())
 	router.Delete("/interests/:id", handler.DeleteInterest, middleware.JWTProtected())
@@ -77,7 +77,7 @@ func (h *InterestHandler) DeleteInterest(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-// GetUserInterests returns all interests for a user
+// GetUserInterestsById returns all interests for a user
 func (h *InterestHandler) GetUserInterestsById(c *fiber.Ctx) error {
 	userId, err := c.ParamsInt("id")
 	interests, err := h.interestController.GetUserInterests(int64(userId))
