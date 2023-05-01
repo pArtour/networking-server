@@ -90,7 +90,6 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
 		if err != nil {
 			return nil, err
 		}
-		defer interestRows.Close()
 
 		for interestRows.Next() {
 			err := interestRows.Scan(&interest.Id, &interest.Name)
@@ -99,8 +98,8 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
 			}
 			user.Interests = append(user.Interests, interest)
 		}
-
 		users = append(users, user)
+		interestRows.Close()
 	}
 
 	if err = userRows.Err(); err != nil {
