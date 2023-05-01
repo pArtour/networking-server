@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -41,7 +40,7 @@ func main() {
 
 	// Database setup
 	db := database.NewDb()
-	defer db.Conn.Close(context.Background())
+	defer db.Conn.Close()
 
 	// Services setup
 	s := services.NewServices(db)

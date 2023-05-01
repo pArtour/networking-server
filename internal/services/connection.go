@@ -44,7 +44,11 @@ func (s *ConnectionService) GetConnectionsByUserId(userId int64) ([]models.Conne
 // CreateConnection creates a new connection.
 func (s *ConnectionService) CreateConnection(body *models.CreateConnectionRecordInput) (*models.Connection, error) {
 	var connection models.Connection
-	err := s.Db.Conn.QueryRow(context.Background(), "INSERT INTO connections (user_id_1, user_id_2) VALUES ($1, $2) RETURNING id, user_id_1, user_id_2", body.UserId, body.TargetUserId).Scan(&connection.Id, &connection.UserId1, &connection.UserId2)
+	conn, err := s.Db.Conn.Acquire(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	err = conn.QueryRow(context.Background(), "INSERT INTO connections (user_id_1, user_id_2) VALUES ($1, $2) RETURNING id, user_id_1, user_id_2", body.UserId, body.TargetUserId).Scan(&connection.Id, &connection.UserId1, &connection.UserId2)
 
 	if err != nil {
 		return nil, err
