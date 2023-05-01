@@ -70,12 +70,12 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 			continue
 		}
 		receiverID := wsMessage.ReceiverId
-		content := wsMessage.Content
+		content := wsMessage.Message
 
 		_, err = h.controller.CreateMessage(&models.CreateMessageInput{
 			SenderId:   senderID,
 			ReceiverId: receiverID,
-			Content:    content,
+			Message:    content,
 		})
 		if err != nil {
 			// Handle database error

@@ -27,7 +27,7 @@ func (s *MessageService) GetMessagesBySenderAndReceiver(senderId, receiverId int
 	var messages []models.Message
 	for rows.Next() {
 		var message models.Message
-		err := rows.Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.Content)
+		err := rows.Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.Message)
 		if err != nil {
 			return nil, err
 		}
@@ -40,7 +40,7 @@ func (s *MessageService) GetMessagesBySenderAndReceiver(senderId, receiverId int
 // CreateMessage creates a new message and returns it
 func (s *MessageService) CreateMessage(body *models.CreateMessageInput) (*models.Message, error) {
 	var message models.Message
-	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING id, sender_id, receiver_id, content", body.SenderId, body.ReceiverId, body.Content).Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.Content)
+	err := s.db.Conn.QueryRow(context.Background(), "INSERT INTO messages (sender_id, receiver_id, message) VALUES ($1, $2, $3) RETURNING id, sender_id, receiver_id, message", body.SenderId, body.ReceiverId, body.Message).Scan(&message.Id, &message.SenderId, &message.ReceiverId, &message.Message)
 	if err != nil {
 		return nil, err
 	}
