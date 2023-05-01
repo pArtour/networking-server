@@ -40,56 +40,91 @@ func (s *UserService) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (s *UserService) GetRestUsers(userId int64) ([]models.User, error) {
-	query := `
-        SELECT 
-            u.id, 
-            u.email,
-            u.name,
-            u.bio,
-            u.profile_picture
-        FROM 
-            users u
-        WHERE 
-            u.id <> $1 AND
-            u.id NOT IN (
-                SELECT 
-                    c.user_id_2 
-                FROM 
-                    connections c 
-                WHERE 
-                    c.user_id_1 = $1
-                UNION
-                SELECT 
-                    c.user_id_1 
-                FROM 
-                    connections c 
-                WHERE 
-                    c.user_id_2 = $1
-            )
-        GROUP BY 
-            u.id;
-    `
+//func (s *UserService) GetRestUsers(userId int64) ([]models.User, error) {
+//	//query := `
+//    //    SELECT
+//    //        u.id,
+//    //        u.email,
+//    //        u.name,
+//    //        u.bio,
+//    //        u.profile_picture
+//    //    FROM
+//    //        users u
+//    //    WHERE
+//    //        u.id <> $1 AND
+//    //        u.id NOT IN (
+//    //            SELECT
+//    //                c.user_id_2
+//    //            FROM
+//    //                connections c
+//    //            WHERE
+//    //                c.user_id_1 = $1
+//    //            UNION
+//    //            SELECT
+//    //                c.user_id_1
+//    //            FROM
+//    //                connections c
+//    //            WHERE
+//    //                c.user_id_2 = $1
+//    //        )
+//    //    GROUP BY
+//    //        u.id;
+//    //`
+//	//
+//	rows, err := s.db.Conn.Query(context.Background(), query, userId)
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer rows.Close()
+//
+//	var users []models.User
+//	for rows.Next() {
+//		var user models.User
+//		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Bio, &user.ProfilePicture)
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		users = append(users, user)
+//
+//	}
+//
+//	return users, nil
+//
+//	}
+//}
 
-	rows, err := s.db.Conn.Query(context.Background(), query, userId)
+// GetRestUsers returns all users with their interests that don't have connection with input user
+func (s *UserService) GetRestUsers(userId int64) ([]models.UserWithInterests, error) {
+	rows, err := s.db.Conn.Query(context.Background(), "SELECT u.id, u.name, u.email, u.bio, u.profile_picture, i.id, i.name FROM users u JOIN user_interests ui ON u.id = ui.user_id JOIN interests i ON i.id = ui.interest_id")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []models.User
+	var users []models.UserWithInterests
+	var user models.UserWithInterests
+	var interest models.Interest
 	for rows.Next() {
-		var user models.User
-		err := rows.Scan(&user.ID, &user.Email, &user.Name, &user.Bio, &user.ProfilePicture)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &interest.Id, &interest.Name)
 		if err != nil {
 			return nil, err
 		}
 
+		user.Interests = append(user.Interests, interest)
 		users = append(users, user)
-
 	}
 
-	return users, nil
+	// Filter users that have connection with input user
+	var filteredUsers []models.UserWithInterests
+	for _, user := range users {
+		if user.ID != userId {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+
+	// Get connections
+	return filteredUsers, nil
 }
 
 func (s *UserService) GetUserByEmail(email string) (*models.UserWithPassword, error) {

@@ -20,7 +20,7 @@ func NewUserController(us *services.UserService, as *services.AuthService) *User
 }
 
 // GetUsers returns all users
-func (c *UserController) GetUsers(userId int64) ([]models.User, error) {
+func (c *UserController) GetUsers(userId int64) ([]models.UserWithInterests, error) {
 	users, err := c.userService.GetRestUsers(userId)
 	if err != nil {
 		return nil, err
