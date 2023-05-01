@@ -68,7 +68,7 @@ func (s *UserService) GetUsersWithInterests(userId int64) ([]models.UserWithInte
                     c.user_id_2 = $1
             )
         GROUP BY 
-            u.id,
+            u.id;
     `
 
 	userRows, err := s.db.Conn.Query(context.Background(), query, userId)
