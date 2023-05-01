@@ -9,7 +9,6 @@ require (
 	github.com/gofiber/websocket/v2 v2.1.6
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/jackc/pgx/v4 v4.18.1
-	github.com/lib/pq v1.10.2
 	golang.org/x/crypto v0.8.0
 )
 

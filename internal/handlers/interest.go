@@ -18,7 +18,7 @@ func NewInterestHandler(router fiber.Router, ic *controllers.InterestController)
 		interestController: ic,
 	}
 	router.Get("/interests", handler.GetInterests)
-	router.Get("/interests/:id", handler.GetUserInterests, middleware.JWTProtected()
+	router.Get("/interests/:id", handler.GetUserInterests, middleware.JWTProtected())
 	router.Get("/interests/me", handler.GetUserInterests, middleware.JWTProtected())
 	router.Post("/interests/:id", handler.AddInterest, middleware.JWTProtected())
 	router.Delete("/interests/:id", handler.DeleteInterest, middleware.JWTProtected())
