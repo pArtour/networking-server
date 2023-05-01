@@ -66,7 +66,7 @@ func (s *UserService) GetUsersWithInterests() ([]models.UserWithInterests, error
 
 func (s *UserService) GetUserByEmail(email string) (*models.UserWithPassword, error) {
 	var user models.UserWithPassword
-	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name, email, bio, profile_picture, password FROM users WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	err := s.db.Conn.QueryRow(context.Background(), "SELECT id, name, email, bio, profile_picture, password FROM users WHERE email=$1", email).Scan(&user.ID, &user.Name, &user.Email, &user.Bio, &user.ProfilePicture, &user.Password)
 	if err != nil {
 		return nil, err
 	}
