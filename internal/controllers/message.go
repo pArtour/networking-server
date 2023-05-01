@@ -19,6 +19,6 @@ func (c *MessageController) CreateMessage(body *models.CreateMessageInput) (*mod
 	return c.service.CreateMessage(body)
 }
 
-func (c *MessageController) GetMessagesBetweenUsers(senderId, receiverId int64) ([]models.Message, error) {
-	return c.service.GetMessagesBySenderAndReceiver(senderId, receiverId)
+func (c *MessageController) GetMessagesForConnection(connectionId int64) ([]models.Message, error) {
+	return c.service.GetMessagesByConnection(connectionId)
 }

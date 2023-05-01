@@ -26,7 +26,7 @@ func NewChatHandler(router fiber.Router, c *controllers.MessageController) {
 	}
 
 	chat.Get("/:connectionId", h.ChatHandler, middleware.JWTProtected(), websocket.New(h.WebSocketHandler))
-	messages.Get("/:userId", h.GetChatHistoryHandler, middleware.JWTProtected())
+	messages.Get("/:connectionId", h.GetChatHistoryHandler, middleware.JWTProtected())
 }
 
 func (h *ChatHandler) ChatHandler(c *fiber.Ctx) error {
@@ -82,9 +82,10 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 		content := wsMessage.Message
 
 		_, err = h.controller.CreateMessage(&models.CreateMessageInput{
-			SenderId:   senderID,
-			ReceiverId: receiverID,
-			Message:    content,
+			SenderId:     senderID,
+			ReceiverId:   receiverID,
+			ConnectionId: connectionID,
+			Message:      content,
 		})
 		if err != nil {
 			// Handle database error
@@ -96,14 +97,14 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 }
 
 func (h *ChatHandler) GetChatHistoryHandler(c *fiber.Ctx) error {
-	userID1, err := helpers.ExtractUserIDFromJWT(c)
+	_, err := helpers.ExtractUserIDFromJWT(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
-	userID2, _ := strconv.ParseInt(c.Params("userId"), 10, 64)
+	connectionId, _ := strconv.ParseInt(c.Params("connectionId"), 10, 64)
 
 	// Fetch the chat history from the database
-	messages, err := h.controller.GetMessagesBetweenUsers(userID1, userID2)
+	messages, err := h.controller.GetMessagesForConnection(connectionId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch chat history: %s", err.Error())})
 	}
