@@ -25,12 +25,12 @@ func (c *ConnectionController) GetUserConnections(id int64) ([]models.Connection
 }
 
 // CreateConnection creates a new connection
-func (c *ConnectionController) CreateConnection(body *models.CreateConnectionRecordInput) (*models.Connection, error) {
-	connection, err := c.connectionService.CreateConnection(body)
+func (c *ConnectionController) CreateConnection(body *models.CreateConnectionRecordInput) error {
+	err := c.connectionService.CreateConnection(body)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return connection, nil
+	return nil
 }
 
 // DeleteConnection deletes a connection
