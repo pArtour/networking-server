@@ -88,8 +88,10 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 			Message:      content,
 		})
 		if err != nil {
-			// Handle database error
-			continue
+			c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("failed to save message: %s", err.Error())))
+			c.Close()
+			break
+
 		}
 
 		chat.BroadcastMessage(connectionID, string(message))
