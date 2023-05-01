@@ -23,7 +23,7 @@ func NewInterestHandler(router fiber.Router, ic *controllers.InterestController)
 	router.Delete("/interests/:id", handler.DeleteInterest, middleware.JWTProtected())
 }
 
-// GetCurrentUserInterests returns all interests for a user
+// GetUserInterests returns all interests for a user
 func (h *InterestHandler) GetUserInterests(c *fiber.Ctx) error {
 	userId, err := helpers.ExtractUserIDFromJWT(c)
 	interests, err := h.interestController.GetUserInterests(userId)
@@ -74,4 +74,14 @@ func (h *InterestHandler) DeleteInterest(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
 	return c.SendStatus(fiber.StatusOK)
+}
+
+// GetUserInterests returns all interests for a user
+func (h *InterestHandler) GetUserInterestsById(c *fiber.Ctx) error {
+	userId, err := c.ParamsInt("id")
+	interests, err := h.interestController.GetUserInterests(int64(userId))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	return c.JSON(interests)
 }
