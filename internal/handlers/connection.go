@@ -48,16 +48,14 @@ func (h *ConnectionHandler) CreateConnection(c *fiber.Ctx) error {
 	if err := c.BodyParser(body); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
-	err = h.controller.CreateConnection(&models.CreateConnectionRecordInput{
+	conn, err := h.controller.CreateConnection(&models.CreateConnectionRecordInput{
 		UserId:       userId,
 		TargetUserId: body.ConnectWithUser,
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: err.Error()})
 	}
-	return c.JSON(fiber.Map{
-		"message": "Connection created successfully",
-	})
+	return c.JSON(conn)
 }
 
 // DeleteConnection deletes a connection
