@@ -18,7 +18,7 @@ func NewMessageService(db *database.Db) *MessageService {
 
 // GetMessagesBySenderAndReceiver returns all messages between two users
 func (s *MessageService) GetMessagesBySenderAndReceiver(senderId, receiverId int64) ([]models.Message, error) {
-	rows, err := s.db.Conn.Query(context.Background(), "SELECT id, sender_id, receiver_id, message, created_at FROM messages WHERE sender_id = $1 AND receiver_id = $2 OR sender_id = $2 AND receiver_id = $1", senderId, receiverId)
+	rows, err := s.db.Conn.Query(context.Background(), "SELECT id, sender_id, receiver_id, message FROM messages WHERE sender_id = $1 AND receiver_id = $2 OR sender_id = $2 AND receiver_id = $1", senderId, receiverId)
 	if err != nil {
 		return nil, err
 	}
