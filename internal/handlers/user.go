@@ -37,7 +37,11 @@ func (h *UserHandler) setupUserRoutes(r fiber.Router) {
 
 // getUsersHandler handles GET /users
 func (h *UserHandler) getUsersHandler(c *fiber.Ctx) error {
-	users, err := h.controller.GetUsers()
+	userId, err := helpers.ExtractUserIDFromJWT(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(&errors.ErrorResponse{Code: fiber.StatusUnauthorized, Message: "Unauthorized"})
+	}
+	users, err := h.controller.GetUsers(userId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(&errors.ErrorResponse{Code: fiber.StatusInternalServerError, Message: fmt.Sprintf("Error getting users: %s", err)})
 	}
