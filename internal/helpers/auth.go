@@ -45,3 +45,17 @@ func ExtractUserIDFromWebsocketJWT(c *websocket.Conn) (int64, error) {
 	userID := int64(claims["user_id"].(float64))
 	return userID, nil
 }
+
+func ExtractUserIDFromJWTString(tokenString string) (int64, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.Cfg.JWTSecret), nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	userID := int64(claims["user_id"].(float64))
+	return userID, nil
+}

@@ -14,3 +14,8 @@ type CreateMessageInput struct {
 	ConnectionId int64  `json:"connection_id" validate:"required"`
 	Message      string `json:"message" validate:"required"`
 }
+
+type ReceivedMessage struct {
+	CreateMessageInput
+	JWT string `json:"jwt" validate:"required"`
+}

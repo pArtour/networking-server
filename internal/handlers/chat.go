@@ -50,12 +50,12 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 
 	// Extract the user ID from the JWT token
 
-	userID, err := helpers.ExtractUserIDFromWebsocketJWT(c)
-	if err != nil {
-		c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "invalid token"))
-		c.Close()
-		return
-	}
+	//userID, err := helpers.ExtractUserIDFromWebsocketJWT(c)
+	//if err != nil {
+	//	c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "invalid token"))
+	//	c.Close()
+	//	return
+	//}
 
 	// Add the WebSocket connection to the connections list
 	chat.AddConnection(connectionID, c)
@@ -69,10 +69,9 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 		}
 
 		// Save the message in the database
-		senderID := userID
 
 		// Extract the receiver ID and content from the message
-		var wsMessage models.CreateMessageInput
+		var wsMessage models.ReceivedMessage
 		err = json.Unmarshal(message, &wsMessage)
 		if err != nil {
 			// Handle JSON unmarshal error
@@ -81,8 +80,15 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 		receiverID := wsMessage.ReceiverId
 		content := wsMessage.Message
 
+		token := wsMessage.JWT
+		userId, err := helpers.ExtractUserIDFromJWTString(token)
+		if err != nil {
+			c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "invalid token"))
+			c.Close()
+			break
+		}
 		_, err = h.controller.CreateMessage(&models.CreateMessageInput{
-			SenderId:     senderID,
+			SenderId:     userId,
 			ReceiverId:   receiverID,
 			ConnectionId: connectionID,
 			Message:      content,
