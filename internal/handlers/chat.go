@@ -65,6 +65,12 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 	for {
 		_, message, err := c.ReadMessage()
 		if err != nil {
+			// If the WebSocket connection is closed, remove it from the list of connections
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				break
+			}
+			c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("invalid message: %s", err.Error())))
+			c.Close()
 			break
 		}
 
@@ -74,8 +80,9 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 		var wsMessage models.ReceivedMessage
 		err = json.Unmarshal(message, &wsMessage)
 		if err != nil {
-			// Handle JSON unmarshal error
-			continue
+			c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("invalid message: %s", err.Error())))
+			c.Close()
+			break
 		}
 		receiverID := wsMessage.ReceiverId
 		content := wsMessage.Message
