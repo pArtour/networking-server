@@ -25,7 +25,7 @@ func NewChatHandler(router fiber.Router, c *controllers.MessageController) {
 		controller: c,
 	}
 	chat.Post("/:connectionId", h.CreateMessageHandler, middleware.JWTProtected())
-	chat.Get("/:connectionId", h.ChatHandler, middleware.JWTProtected(), websocket.New(h.WebSocketHandler))
+	chat.Get("/:connectionId", h.ChatHandler, websocket.New(h.WebSocketHandler))
 	messages.Get("/:connectionId", h.GetChatHistoryHandler, middleware.JWTProtected())
 }
 
