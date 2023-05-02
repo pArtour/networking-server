@@ -20,13 +20,13 @@ type ChatHandler struct {
 
 func NewChatHandler(router fiber.Router, c *controllers.MessageController) {
 	messages := router.Group("/messages", middleware.JWTProtected())
-	chat := router.Group("/chat", middleware.JWTProtected())
+	chat := router.Group("/chat")
 	h := &ChatHandler{
 		controller: c,
 	}
 	chat.Post("/:connectionId", h.CreateMessageHandler, middleware.JWTProtected())
 	chat.Get("/:connectionId", h.ChatHandler, websocket.New(h.WebSocketHandler))
-	messages.Get("/:connectionId", h.GetChatHistoryHandler, middleware.JWTProtected())
+	messages.Get("/:connectionId", h.GetChatHistoryHandler)
 }
 
 func (h *ChatHandler) ChatHandler(c *fiber.Ctx) error {
