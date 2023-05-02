@@ -94,7 +94,7 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 			c.Close()
 			break
 		}
-		_, err = h.controller.CreateMessage(&models.CreateMessageInput{
+		newMessage, err := h.controller.CreateMessage(&models.CreateMessageInput{
 			SenderId:     userId,
 			ReceiverId:   receiverID,
 			ConnectionId: connectionID,
@@ -106,8 +106,14 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 			break
 
 		}
-
-		chat.BroadcastMessage(connectionID, string(message))
+		m, err := json.Marshal(newMessage)
+		if err != nil {
+			c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("failed to save message: %s", err.Error())))
+			c.Close()
+			break
+		}
+		// Broadcast the message to all other connected users
+		chat.BroadcastMessage(connectionID, m)
 	}
 }
 

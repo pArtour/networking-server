@@ -40,10 +40,10 @@ func GetConnectionByID(ConnID int64) *Connection {
 	return nil
 }
 
-func BroadcastMessage(ConnID int64, message string) {
+func BroadcastMessage(ConnID int64, message []byte) {
 	for _, conn := range connections {
 		if conn.ConnID == ConnID {
-			conn.Conn.WriteMessage(websocket.TextMessage, []byte(message))
+			conn.Conn.WriteMessage(websocket.TextMessage, message)
 		}
 	}
 }
